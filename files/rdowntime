@@ -1,0 +1,9 @@
+#!/bin/sh
+echo "GET downtimes" > /tmp/downtime.search
+echo "Filter: host_name = $(hostname)" >> /tmp/downtime.search
+echo "Columns: id" >> /tmp/downtime.search
+DOWNTIMEID=`nc azoptimus.solint.net 6557 < /tmp/downtime.search`
+rm -fr /tmp/downtime.search
+echo "COMMAND [$(date +%s)] DEL_HOST_DOWNTIME;${DOWNTIMEID}" | nc -4 -w 1 azoptimus.solint.net 6557
+echo "Downtime ID: ${DOWNTIMEID} removed for $(hostname)"
+

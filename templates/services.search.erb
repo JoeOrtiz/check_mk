@@ -1,0 +1,7 @@
+GET services
+Columns: service_description plugin_output
+Filter: state >= 1
+Filter: in_notification_period = 1
+Filter: host_name ~ ^<%= @hostname %>.mk
+Filter: host_name ~ ^<%= @fqdn %>
+Or: 2

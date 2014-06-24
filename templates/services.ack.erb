@@ -1,0 +1,8 @@
+GET services
+Columns: host_name service_description
+Filter: state >= 1
+Filter: in_notification_period = 1
+Filter: acknowledged = 0
+Filter: host_name ~ ^<%= @hostname %>.mk
+Filter: host_name ~ ^<%= @fqdn %>
+Or: 2

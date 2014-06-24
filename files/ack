@@ -1,0 +1,23 @@
+#!/bin/sh
+nc -w 1 azoptimus.solint.net 6557 < /usr/local/etc/services.ack > /tmp/ack.services
+if [ ! -s /tmp/ack.services ]; then
+        echo "All problematic services are already acknowledged."
+        exit
+fi
+if [ -z "$1" ]; then
+        REASON="EMPTY"
+else
+        REASON=$*
+fi
+if [ -z "$LOGNAME" ]; then
+         LOGNAME="nagiosadmin"
+fi
+while read line
+        do
+SERVER=`echo "$line"|cut -d\; -f1`
+SERVICE=`echo "$line"|cut -d\; -f2`
+echo "COMMAND [$(date +%s)] ACKNOWLEDGE_SVC_PROBLEM;${SERVER};${SERVICE};2;1;1;${LOGNAME};${REASON}" | nc -4 -w 1 azoptimus.solint.net 6557
+echo "${SERVICE} has been acknowledged with reason: ${REASON} on ${SERVER} by ${LOGNAME}"
+        done < /tmp/ack.services
+rm -fr /tmp/ack.services
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+ if [ -z "$1" ]; then
+              echo usage: $0 reason for downtime
+              exit
+          fi
+ if [ -z "$LOGNAME" ]; then
+              LOGNAME="nagiosadmin"
+          fi
+echo "COMMAND [$(date +%s)] SCHEDULE_HOST_DOWNTIME;$(hostname);$(date +%s);$(date --date "$dte  0 days 1 hour 0 sec" +%s);1;0;3600;${LOGNAME};$*" | nc -4 -w 1 azoptimus.solint.net 6557
+echo "Downtime scheduled for $(hostname) for 60 minutes. Use rdowntime to remove scheduled downtime."
+

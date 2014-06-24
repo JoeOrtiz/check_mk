@@ -1,0 +1,22 @@
+#!/bin/bash
+if [ -f '/usr/local/crexendo/freeswitch/bin/fs_cli' ];
+then
+/usr/local/crexendo/freeswitch/bin/fs_cli -x "status" > /tmp/fsStatus
+if [ $? -ne 0 ]; then
+        echo "2 MK_Freeswitch - Freeswitch is not responding!"
+        rm /tmp/fsStatus
+        exit 0
+fi
+
+CALLCOUNT=`/usr/local/crexendo/freeswitch/bin/fs_cli -x "show calls count" | grep -Po '^\d+'`
+CHANNELCOUNT=`/usr/local/crexendo/freeswitch/bin/fs_cli -x "show channels count" | grep -Po '^\d+'`
+/usr/local/crexendo/freeswitch/bin/fs_cli -x "sofia xmlstatus gateway" > /tmp/gateway.xml
+CALLSOUT=`echo 'cat /gateways/gateway/*[local-name()="name" or local-name()="calls-out"]/text()' |xmllint --format --shell /tmp/gateway.xml | sed '/^\/ >/d' | sed '/-------/d'| sed '1~2 s/^/,/g'| sed ':a;N;$!ba;s/\n/:/g'|sed 's/:,/|/g'|sed 's/^,//'|sed 's/:/=/g'|sed 's/example.com=0|//g'`
+FAILEDOUT=`echo 'cat /gateways/gateway/*[local-name()="name" or local-name()="failed-calls-out"]/text()' |xmllint --format --shell /tmp/gateway.xml | sed '/^\/ >/d' | sed '/-------/d'| sed '1~2 s/^/,/g'| sed ':a;N;$!ba;s/\n/:/g'|sed 's/:,/|/g'|sed 's/^,//'|sed 's/:/-failedcalls=/g'|sed 's/example.com-failedcalls=0|//g'`
+MINCPU=`cat /tmp/fsStatus|grep cpu|cut -f1 -d/|grep -Po '\d.+'`
+IDLECPU=`cat /tmp/fsStatus|grep cpu|cut -f2 -d/|grep -Po '\d.+'`
+        echo "0 MK_Freeswitch Calls=$CALLCOUNT|Channels=$CHANNELCOUNT|Min_CPU=$MINCPU|Idle_CPU=$IDLECPU|$CALLSOUT|$FAILEDOUT OK - Calls/Channels $CALLCOUNT/$CHANNELCOUNT"
+        rm /tmp/gateway.xml /tmp/fsStatus
+else
+   exit 0
+fi

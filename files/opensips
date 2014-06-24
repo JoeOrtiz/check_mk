@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ -f '/usr/local/opensips_sbc/sbin/opensipsctl' ];
+then
+/usr/local/opensips_sbc/sbin/opensipsctl fifo version > /tmp/opensips
+if [ $? -ne 0 ]; then
+        echo "2 MK_OpenSIPS - OpenSIPS is not responding!"
+        rm /tmp/opensips
+        exit 0
+fi
+VERSION=`cat /tmp/opensips|cut -f3 -d:`
+STATISTICS=`/usr/local/opensips_sbc/sbin/opensipsctl fifo get_statistics all|grep -v ^pkmem|grep -v "= 0"|sed 's/:/-/g'|sed 's/ //g'|tr '\n' '|'|sed '$s/.$//'`
+echo "0 MK_OpenSIPS $STATISTICS OK -$VERSION"
+else
+   exit 0
+fi
